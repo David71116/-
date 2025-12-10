@@ -4,106 +4,56 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>就決定是你了！收服臺灣消失的糖廠與鐵道</title>
-
+    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
-
+    
     <style>
-        /* --- 樣式定義：紅球主題 --- */
         :root { --dex-red: #dd0b2d; --screen-bg: #98cb98; --btn-blue: #22edfc; --poke-yellow: #ffcb05; --poke-blue: #2a75bb; }
-        body {
-            margin: 0; padding: 0; height: 100vh;
-            font-family: 'Press Start 2P', cursive;
-            overflow: hidden;
-            display: flex; align-items: center; justify-content: center;
-            background-color: #333;
-            background-image: url('pokemon_bg.png'); 
-            background-size: cover; background-position: center; background-repeat: no-repeat;
-        }
-
-        /* 開場畫面 */
-        #start-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: linear-gradient(180deg, var(--dex-red) 50%, #f0f0f0 50%);
-            z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center;
-            transition: transform 0.8s ease-in-out;
-        }
-        #start-screen::after { content: ''; position: absolute; top: 50%; left: 0; width: 100%; height: 40px; background: #000; transform: translateY(-50%); z-index: -1; }
+        body { margin: 0; padding: 0; height: 100vh; font-family: 'Press Start 2P', cursive; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #333; background-image: radial-gradient(#444 15%, transparent 16%), radial-gradient(#444 15%, transparent 16%); background-size: 20px 20px; }
+        #start-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(180deg, var(--dex-red) 50%, #f0f0f0 50%); z-index: 99999; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: transform 0.8s ease-in-out; }
         .poke-ball-btn { width: 100px; height: 100px; background: #fff; border: 10px solid #000; border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: -1; }
         #start-screen.hidden { transform: translateY(-100%); }
         .title-box { background: rgba(255,255,255,0.95); border: 6px solid #000; padding: 30px; text-align: center; margin-bottom: 120px; box-shadow: 10px 10px 0 rgba(0,0,0,0.5); }
         .start-btn { background: #ffde00; border: 4px solid var(--poke-blue); padding: 15px 30px; font-family: 'Press Start 2P', cursive; font-size: 18px; cursor: pointer; box-shadow: 6px 6px 0 #000; animation: blink 1s infinite; margin-top: 100px; }
         .start-btn:hover { transform: scale(1.1); background: #fff; }
         @keyframes blink { 50% { opacity: 0; } }
-
-        /* 圖鑑機身 */
-        #pokedex {
-            position: relative; z-index: 10;
-            width: 90vw; max-width: 900px; height: 90vh; max-height: 750px;
-            background-color: var(--dex-red); 
-            border-radius: 20px 20px 20px 60px;
-            padding: 20px; display: flex; flex-direction: column;
-            border: 6px solid #000; box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-        }
-        .header-deco { position: relative; height: 60px; width: 100%; margin-bottom: 10px; }
-        .camera-lens { width: 50px; height: 50px; background: radial-gradient(circle at 30% 30%, #fff, var(--btn-blue)); border: 5px solid #fff; border-radius: 50%; position: absolute; top: 0; left: 0; box-shadow: 0 0 15px var(--btn-blue); animation: lightPulse 3s infinite; }
-        .small-lights { position: absolute; top: 5px; left: 70px; display: flex; gap: 10px; }
+        #pokedex { position: relative; z-index: 10; width: 95vw; max-width: 1000px; height: 90vh; max-height: 750px; background-color: var(--dex-red); border-radius: 20px 20px 20px 60px; padding: 20px; display: flex; flex-direction: column; border: 6px solid #000; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
+        .header-deco { position: relative; height: 50px; width: 100%; margin-bottom: 10px; }
+        .camera-lens { width: 45px; height: 45px; background: radial-gradient(circle at 30% 30%, #fff, var(--btn-blue)); border: 5px solid #fff; border-radius: 50%; position: absolute; top: 0; left: 0; box-shadow: 0 0 15px var(--btn-blue); animation: lightPulse 3s infinite; }
+        .small-lights { position: absolute; top: 5px; left: 65px; display: flex; gap: 10px; }
         .dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #000; }
         .red { background: #f00; } .yellow { background: #ffde00; } .green { background: #0f0; }
         @keyframes lightPulse { 0% { opacity: 0.6; } 50% { opacity: 1; box-shadow: 0 0 25px var(--btn-blue); } 100% { opacity: 0.6; } }
-
         #screen-container { flex-grow: 1; background: #b0b0b0; border-radius: 10px 10px 40px 10px; padding: 15px 15px 40px 15px; border: 4px solid #000; display: flex; flex-direction: column; position: relative; }
         #map-border { border: 4px solid #5a5a5a; border-radius: 5px; height: 100%; background: #000; box-shadow: inset 3px 3px 8px rgba(0,0,0,0.5); overflow: hidden; position: relative; }
         #map { width: 100%; height: 100%; background: #a8dcb0; image-rendering: pixelated; }
-
         #controls-area { height: 60px; margin-top: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 20px; background: #222; border-radius: 10px; border: 3px solid #000; }
         #search-input { width: 100%; background: #98cb98; border: none; padding: 12px; font-family: 'Press Start 2P', cursive; font-size: 12px; color: #000; box-shadow: inset 3px 3px 0 rgba(0,0,0,0.2); }
         #search-input:focus { outline: 2px solid var(--dex-red); }
         .btn-group { display: flex; gap: 5px; }
         button { background: #ffde00; border: 3px solid #000; padding: 12px; cursor: pointer; font-family: 'Press Start 2P', cursive; font-size: 10px; box-shadow: 4px 4px 0 #000; }
         button:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0 #000; }
-
-        /* 皮卡丘控制器 */
-        .custom-layer-control {
-            position: absolute; top: 20px; right: 10px; z-index: 1000;
-            background: #fff; border: 4px solid var(--poke-blue); border-radius: 15px;
-            padding: 0; font-size: 10px; color: #000; box-shadow: 6px 6px 0 rgba(0,0,0,0.3);
-            max-height: 85%; overflow: visible; width: 260px; animation: float 3s ease-in-out infinite;
-        }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-        .custom-layer-control::before {
-            content: ''; position: absolute; top: -40px; right: 5px; width: 50px; height: 50px;
-            background-image: url('https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif');
-            background-repeat: no-repeat; background-size: contain; z-index: 2;
-        }
-
+        .custom-layer-control { position: absolute; top: 20px; right: 10px; z-index: 1000; background: #fff; border: 4px solid var(--poke-blue); border-radius: 15px; padding: 0; font-size: 10px; color: #000; box-shadow: 6px 6px 0 rgba(0,0,0,0.3); max-height: 85%; overflow-y: auto; width: 260px; }
         .control-title-bar { background: var(--poke-yellow); border-bottom: 4px solid var(--poke-blue); padding: 10px; text-align: center; font-weight: bold; color: var(--poke-blue); border-radius: 10px 10px 0 0; display: flex; align-items: center; justify-content: center; gap: 8px; }
         .control-content { padding: 10px; background: #fff; border-radius: 0 0 10px 10px; max-height: 300px; overflow-y: auto; }
         .layer-item { margin-bottom: 12px; border: 2px solid #eee; border-radius: 8px; padding: 8px; background: #f9f9f9; transition: 0.2s; }
         .layer-item:hover { border-color: var(--poke-blue); background: #eef7ff; }
+        .layer-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 5px; }
         .layer-label { display: flex; align-items: center; gap: 8px; cursor: pointer; line-height: 1.4; font-size: 9px; }
-        
-        /* Checkbox - 紅球 */
         input[type="checkbox"] { appearance: none; width: 16px; height: 16px; border: 2px solid #333; border-radius: 50%; background: #fff; cursor: pointer; position: relative; }
         input[type="checkbox"]:checked { background: linear-gradient(to bottom, #f00 50%, #fff 50%); } 
         input[type="checkbox"]:checked::after { content: ''; position: absolute; top: 50%; left: 50%; width: 4px; height: 4px; background: #fff; border: 1px solid #333; border-radius: 50%; transform: translate(-50%, -50%); }
         .opacity-slider { width: 100%; height: 6px; -webkit-appearance: none; background: #ddd; outline: none; border-radius: 3px; }
         .opacity-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; background: var(--poke-blue); border: 2px solid #fff; border-radius: 50%; box-shadow: 0 0 2px #000; cursor: pointer; }
-
         .leaflet-popup-content-wrapper { border-radius: 0; border: 4px solid #000; box-shadow: 4px 4px 0 rgba(0,0,0,0.5); }
         .leaflet-popup-content { margin: 10px; font-family: 'Press Start 2P', cursive; font-size: 10px; line-height: 1.5; }
         .leaflet-control-zoom { display: none; }
         .pokemon-style-filter { filter: contrast(130%) saturate(160%) hue-rotate(-10deg) brightness(105%); }
         .history-sepia { filter: sepia(30%) contrast(110%); }
-
-        /* 寶可夢實體樣式 */
         .poke-sprite-icon { background: transparent; border: none; }
         .poke-sprite-img { width: 100%; height: auto; image-rendering: pixelated; filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.4)); }
-
-        @media (max-width: 600px) {
-            #pokedex { width: 95vw; height: 95vh; padding: 10px; }
-            .custom-layer-control { width: 180px; font-size: 8px; right: 5px; top: 5px; }
-        }
+        @media (max-width: 600px) { #pokedex { width: 95vw; height: 95vh; padding: 10px; } .custom-layer-control { width: 180px; font-size: 8px; right: 5px; top: 5px; } }
     </style>
 </head>
 <body>
@@ -111,22 +61,15 @@
     <div id="start-screen">
         <div class="poke-ball-btn"></div>
         <div class="title-box">
-            <div style="font-size:20px; color:var(--poke-blue); text-shadow: 2px 2px #ffde00; line-height: 1.5;">就決定是你了！收服臺灣消失的糖廠與鐵道<br>Sugar Industry MAP</div>
-            <div style="font-size:10px; margin-top:10px; color:#555;">VER 1939.0</div>
+            <div style="font-size:20px; color:var(--poke-blue); text-shadow: 2px 2px #ffde00; line-height: 1.5;">SUGAR FACTORY<br>HISTORY MAP</div>
+            <div style="font-size:10px; margin-top:10px; color:#555;">VER 1939.8 (FINAL FIX)</div>
         </div>
         <button class="start-btn" onclick="startGame()">PRESS START</button>
     </div>
 
-    <div id="drop-hint"></div>
-
     <div id="pokedex">
-        <div class="header-deco">
-            <div class="camera-lens"></div>
-            <div class="small-lights"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div>
-        </div>
-        <div id="screen-container">
-            <div id="map-border"><div id="map"></div></div>
-        </div>
+        <div class="header-deco"><div class="camera-lens"></div><div class="small-lights"><div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div></div></div>
+        <div id="screen-container"><div id="map-border"><div id="map"></div></div></div>
         <div id="controls-area">
             <input type="text" id="search-input" placeholder="SEARCH...">
             <div class="btn-group">
@@ -142,138 +85,127 @@
     <script>
         function startGame() { document.getElementById('start-screen').classList.add('hidden'); }
 
-        // --- 1. 定義紅球和藍球的 SVG ---
-        // 預設紅球 (用於大部分點位)
-        const iconPokeRedUrl = 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#f00" stroke="#000" stroke-width="2"/><path d="M2 20 H38" stroke="#000" stroke-width="2"/><path d="M2 20 A18 18 0 0 0 38 20 Z" fill="#fff"/><circle cx="20" cy="20" r="5" fill="#fff" stroke="#000" stroke-width="2"/><circle cx="20" cy="20" r="2" fill="#fff" stroke="#000" stroke-width="1"/></svg>`);
-        
-        // 藍球 (專用於虎尾/善化)
-        const iconPokeBlueUrl = 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#1976d2" stroke="#000" stroke-width="2"/><path d="M2 20 H38" stroke="#000" stroke-width="2"/><path d="M2 20 A18 18 0 0 0 38 20 Z" fill="#fff"/><circle cx="20" cy="20" r="5" fill="#fff" stroke="#000" stroke-width="2"/><circle cx="20" cy="20" r="2" fill="#fff" stroke="#000" stroke-width="1"/></svg>`);
-
-        // 其他圖標保持不變
+        // --- ICON 定義 ---
         const iconHouseUrl = 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><path d="M20 5 L5 18 H10 V35 H30 V18 H35 Z" fill="#d32f2f" stroke="#000" stroke-width="2"/><rect x="16" y="22" width="8" height="13" fill="#6d4c41" stroke="#000" stroke-width="2"/></svg>`);
+        const iconPokeBlueUrl = 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#1976d2" stroke="#000" stroke-width="2"/><path d="M2 20 H38" stroke="#000" stroke-width="2"/><path d="M2 20 A18 18 0 0 0 38 20 Z" fill="#fff"/><circle cx="20" cy="20" r="5" fill="#fff" stroke="#000" stroke-width="2"/><circle cx="20" cy="20" r="2" fill="#fff" stroke="#000" stroke-width="1"/></svg>`);
+        const iconPokeRedUrl = 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" fill="#f00" stroke="#000" stroke-width="2"/><path d="M2 20 H38" stroke="#000" stroke-width="2"/><path d="M2 20 A18 18 0 0 0 38 20 Z" fill="#fff"/><circle cx="20" cy="20" r="5" fill="#fff" stroke="#000" stroke-width="2"/><circle cx="20" cy="20" r="2" fill="#fff" stroke="#000" stroke-width="1"/></svg>`);
         const defaultImgUrl = 'data:image/svg+xml;base64,' + btoa(`<svg xmlns="http://www.w3.org/2000/svg" width="300" height="150"><rect width="100%" height="100%" fill="#98cb98"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="monospace" font-size="20" fill="#333">NO DATA</text></svg>`);
         const ballIconSmall = `<svg width="16" height="16" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="18" fill="#f00" stroke="#2a75bb" stroke-width="4"/><path d="M2 20 H38" stroke="#2a75bb" stroke-width="4"/><path d="M2 20 A18 18 0 0 0 38 20 Z" fill="#fff"/><circle cx="20" cy="20" r="6" fill="#fff" stroke="#2a75bb" stroke-width="4"/></svg>`;
-
 
         var map = L.map('map', { preferCanvas: true }).setView([23.6, 121.0], 8);
         L.simpleMapScreenshoter({ hidden: false }).addTo(map);
 
-        // --- 2. 寶可夢實體 (永久顯示) ---
-        var pokemonOnMapGroup = L.layerGroup(); 
+        // --- 1. 核心讀檔函數 (邏輯修正) ---
+        async function loadGeoJSON(fileName, group, color, name) {
+            try {
+                const res = await fetch(fileName);
+                if (!res.ok) throw new Error(`找不到 ${fileName}`);
+                const data = await res.json();
+                
+                // ★ 優先判斷：如果是 "1939 RAILWAY" ★
+                if (name.includes('1939 RAILWAY')) {
+                    // 黑白雙層線條
+                    L.geoJSON(data, { style: { color: "#000", weight: 5, opacity: 0.9 } }).addTo(group);
+                    L.geoJSON(data, { style: { color: "#fff", weight: 3, dashArray: "5, 5", opacity: 1 } }).addTo(group);
+                
+                // ★ 其次判斷：是否為「點資料」 (HIDDEN DATA) ★
+                // 我們檢查資料內容是否為 Point，或者名字包含 HIDDEN/FACTORY
+                // 這樣就不會因為檔名 confuse 造成把線條畫成球
+                } else {
+                    L.geoJSON(data, {
+                        style: function(feature) {
+                            // 如果是 LineString (線)，使用粉紅色 (糖鐵)
+                            return { 
+                                color: color, 
+                                weight: name.includes('SUGAR') ? 2 : 4, 
+                                opacity: 0.8 
+                            };
+                        },
+                        pointToLayer: function(feature, latlng) {
+                            // ★ 只有 Point (點) 才會畫成寶貝球 ★
+                            if (feature.geometry.type === "Point") {
+                                let isBlue = false;
+                                if (feature.properties) {
+                                    const p = feature.properties;
+                                    const nameStr = (p.日治舊名 || p.戰後新名 || '').toLowerCase();
+                                    const endYear = parseInt(p.經營訖) || 0;
+                                    // 判斷虎尾/善化 -> 藍球
+                                    if (nameStr.includes('虎尾') || nameStr.includes('善化') || endYear >= 2025) {
+                                        isBlue = true;
+                                    }
+                                }
+                                const iconUrl = isBlue ? iconPokeBlueUrl : iconPokeRedUrl;
+                                return L.marker(latlng, {icon: L.icon({ 
+                                    iconUrl: iconUrl, 
+                                    iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32], className: 'pixel-marker' 
+                                })});
+                            }
+                            return null; // 不是點就不畫 Marker
+                        },
+                        onEachFeature: bindPopupFeature
+                    }).addTo(group);
+                }
+                
+                group.addTo(map);
+                console.log(`Loaded: ${fileName}`);
+                updateCustomControl();
+            } catch (e) { console.warn(`Load error: ${fileName}`, e); }
+        }
 
-        const pokemonList = [
-            // 水箭龜：放在東部外海 (太平洋)
-            { name: 'Blastoise', lat: 24.5, lng: 123.0, 
-              img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/9.gif', 
-              size: 80, dialogue: "卡咩! (我在守護東海岸!)" },
-            // 噴火龍：放在西部外海 (海峽中線)
-            { name: 'Charizard', lat: 23.5, lng: 119.2, 
-              img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/6.gif', 
-              size: 100, dialogue: "吼喔! (這片海峽風好大!)" },
-            // 皮卡丘：放在北部基隆嶼外海
-            { name: 'Pikachu', lat: 25.5, lng: 122.0, 
-              img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif', 
-              size: 60, dialogue: "皮卡皮卡! (這裡風景真好!)" }
-        ];
+        function bindPopupFeature(feature, layer) {
+            addToSearchIndex(feature, layer);
+            let p = feature.properties;
+            let title = p.日治舊名 || p.name || 'Unknown';
+            let desc = '';
+            if (p.戰後新名) desc += `現名: ${p.戰後新名}<br>`;
+            if (p['產能(噸/日)']) desc += `產能: ${p['產能(噸/日)']} 噸/日<br>`;
+            if (p.原所屬會社) desc += `會社: ${p.原所屬會社}<br>`;
+            if (p.經營起) desc += `經營: ${p.經營起} ~ ${p.經營訖}<br>`;
+            let imgHtml = p.url ? `<img src="${p.url}" onerror="this.onerror=null;this.src='${defaultImgUrl}'" style="width:100%;height:100px;object-fit:cover;border-bottom:2px solid #000;image-rendering:pixelated;">` : '';
+            layer.bindPopup(`${imgHtml}<div style="padding:10px;font-size:10px;"><b>${title}</b><br>${desc}</div>`);
+        }
 
-        pokemonList.forEach(p => {
-            let icon = L.divIcon({
-                className: 'poke-sprite-icon',
-                html: `<img src="${p.img}" class="poke-sprite-img" style="width:${p.size}px;">`,
-                iconSize: [p.size, p.size],
-                iconAnchor: [p.size/2, p.size/2],
-                popupAnchor: [0, -p.size/2]
-            });
-            L.marker([p.lat, p.lng], {icon: icon})
-             .bindPopup(`<b>${p.name}</b><br>${p.dialogue}`)
-             .addTo(pokemonOnMapGroup);
-        });
-
-        // --- 3. 圖層定義與載入 ---
+        // --- 2. 圖層宣告 ---
         var layerPokemon = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: 'Pokemon Style', maxZoom: 19, className: 'pokemon-style-filter' }).addTo(map);
         var layerModern = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: 'OSM', maxZoom: 19 });
         var layerHistory1953 = L.tileLayer('https://gis.sinica.edu.tw/tileserver/file-exists.php?img=TM100K_1953-png-{z}-{x}-{y}', { maxZoom: 19, maxNativeZoom: 13, className: 'history-sepia', attribution: 'Sinica 1953', referrerPolicy: 'no-referrer' });
         
-        var layer1939 = L.layerGroup(); var layerSugar = L.layerGroup(); var layerExtra = L.layerGroup(); var layerTaiwan = L.layerGroup();
-        var searchIndex = [];
+        var layer1939 = L.layerGroup();      // 官鐵
+        var layerSugarRail = L.layerGroup(); // 糖鐵
+        var layerHeatmap = L.layerGroup();   // 糖廠點位 (HIDDEN DATA)
+        var layerExtra = L.layerGroup();     // 拖曳預留
+        var layerTaiwan = L.layerGroup();    // 台灣區域
 
-        function addToSearchIndex(feature, layer) { if (feature.properties) { let searchText = ""; for (let k in feature.properties) searchText += feature.properties[k] + " "; searchIndex.push({ text: searchText.toLowerCase(), layer: layer, coords: layer.getLatLng ? layer.getLatLng() : layer.getBounds().getCenter() }); }}
-        function findImageInProperties(props) { if (!props) return null; if (props.photo) return { url: props.photo, key: 'photo' }; for (let key in props) { let val = String(props[key]); if (val.startsWith('http') || val.match(/\.(jpeg|jpg|gif|png)$/i)) return { url: val, key: key }; } return null; }
-
-        async function loadGeoJSON(fileName, group, color, name) {
-            try {
-                const res = await fetch(fileName);
-                if (!res.ok) throw new Error("404");
-                const data = await res.json();
-                
-                // ★ 1939 RAILWAY 樣式強化 ★
-                let styleOptions = { color: color, weight: 5, opacity: 1, dashArray: null };
-                if (name.includes('TAIWAN')) {
-                    styleOptions = { color: color, weight: 3, opacity: 1, dashArray: '5,5' };
-                } else if (name.includes('1939 RAILWAY')) {
-    styleOptions = { color: '#FFFF00', weight: 4, opacity: 1, dashArray: null }; // 亮黃色實線
-}
-
-                L.geoJSON(data, {
-                    style: styleOptions,
-                    pointToLayer: function(feature, latlng) {
-                        let iconUrl = iconPokeRedUrl; // 預設使用紅球
-                        
-                        // 檢查是否為需要變色的藍球地點
-                        let match = false;
-                        if (feature.properties) {
-                            const nameLower = (feature.properties.日治舊名 || feature.properties.戰後新名 || feature.properties.別名 || '').toLowerCase();
-                            if (nameLower.includes('虎尾') || nameLower.includes('善化') || nameLower.includes('灣裡') || nameLower.includes('huwei') || nameLower.includes('shanhua')) {
-                                match = true;
-                            }
-                        }
-
-                        // 設定圖標
-                        if (match) {
-                            iconUrl = iconPokeBlueUrl; // 匹配地點使用藍球
-                        } else if (name.includes('SUGAR')) {
-                            iconUrl = iconHouseUrl; // 糖業圖層但非藍球地點，使用房屋圖示
-                        } 
-                        // 其他點位，使用預設紅球 (iconPokeRedUrl)
-
-                        return L.marker(latlng, {icon: L.icon({ iconUrl: iconUrl, iconSize: [32, 32], iconAnchor: [16, 32], popupAnchor: [0, -32], className: 'pixel-marker' })});
-                    },
-                    onEachFeature: function(feature, layer) {
-                        addToSearchIndex(feature, layer);
-                        let foundImg = findImageInProperties(feature.properties);
-                        let displayImg = foundImg ? foundImg.url : defaultImgUrl;
-                        let imgKeyToRemove = foundImg ? foundImg.key : null;
-                        
-                        // ★ 修復：新增 onerror 屬性來處理圖片載入失敗 (Pop-up 破圖問題) ★
-                        let html = `<img src="${displayImg}" onerror="this.onerror=null;this.src='${defaultImgUrl}'" style="width:100%;height:100px;object-fit:cover;border-bottom:2px solid #000;image-rendering:pixelated;"><div style="padding:10px;font-size:10px;"><b>${name}</b><br>`;
-                        if(feature.properties) for(let k in feature.properties) if(k !== imgKeyToRemove && feature.properties[k]) html += `${k}: ${feature.properties[k]}<br>`;
-                        html += `</div>`;
-                        layer.bindPopup(html);
-                    }
-                }).addTo(group);
-                group.addTo(map);
-                updateCustomControl();
-            } catch (e) { 
-                console.error(`ERROR: 無法載入 ${fileName}. 請檢查檔案是否存在。`, e);
-            }
-        }
-
-        // 載入 GeoJSON (假設檔案存在同目錄)
-        loadGeoJSON('糖業.geojson', layerSugar, '#d32f2f', 'SUGAR FACTORY');
-        loadGeoJSON('123456.geojson', layerExtra, '#1976d2', 'HIDDEN DATA');
-        loadGeoJSON('台灣.geojson', layerTaiwan, '#2e7d32', 'TAIWAN REGION');
-               
-        
-
-        var layerConfig = [
-            { name: "✨ POKEMON STYLE", layer: layerPokemon, type: 'tile' },
-            { name: "🗺️ MODERN MAP (現今)", layer: layerModern, type: 'tile' },
-            { name: "📜 1953 交通圖", layer: layerHistory1953, type: 'tile' },
-             { name: "🛤️ Sugar Railway", layer: layerSugar, type: 'vector' },
-            { name: "🍬 Sugar industry", layer: layerExtra, type: 'vector' },
-            { name: "🌿 TAIWAN REGION", layer: layerTaiwan, type: 'vector' }
+        // 寶可夢裝飾
+        var pokemonOnMapGroup = L.layerGroup().addTo(map);
+        const pokemonList = [
+            { name: 'Blastoise', lat: 24.5, lng: 123.0, img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/9.gif', size: 80, dialogue: "卡咩!" },
+            { name: 'Charizard', lat: 23.5, lng: 119.2, img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/6.gif', size: 100, dialogue: "吼喔!" },
+            { name: 'Pikachu', lat: 25.5, lng: 122.0, img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif', size: 60, dialogue: "皮卡皮卡!" }
         ];
+        pokemonList.forEach(p => {
+            let icon = L.divIcon({ className: 'poke-sprite-icon', html: `<img src="${p.img}" class="poke-sprite-img" style="width:${p.size}px;">`, iconSize: [p.size, p.size], iconAnchor: [p.size/2, p.size/2], popupAnchor: [0, -p.size/2] });
+            L.marker([p.lat, p.lng], {icon: icon}).bindPopup(`<b>${p.name}</b><br>${p.dialogue}`).addTo(pokemonOnMapGroup);
+        });
 
+        // --- 3. 讀取檔案 (依照您的截圖設定) ---
+        // 1939.geojson -> layer1939 (黑白鐵軌)
+        loadGeoJSON('1939.geojson', layer1939, '#000000', '1939 RAILWAY');
+        
+        // 糖業.geojson -> layerSugar (粉紅色線條)
+        // 註：就算您命名為 FACTORY，因為內容是 LineString，新邏輯會把它畫成線，不會變成球
+        loadGeoJSON('糖業.geojson', layerSugarRail, '#d32f2f', 'SUGAR FACTORY'); 
+        
+        // 123456.geojson -> layerExtra (紅/藍球)
+        // 這裡會被新邏輯判定為 Point，所以會畫成紅球/藍球
+        loadGeoJSON('123456.geojson', layerExtra, '#1976d2', 'HIDDEN DATA');
+        
+        loadGeoJSON('台灣.geojson', layerTaiwan, '#2e7d32', 'TAIWAN REGION');
+
+        // --- 4. 搜尋與拖曳 ---
+        var searchIndex = [];
+        function addToSearchIndex(feature, layer) { if (feature.properties) { let searchText = ""; for (let k in feature.properties) searchText += feature.properties[k] + " "; searchIndex.push({ text: searchText.toLowerCase(), layer: layer, coords: layer.getLatLng ? layer.getLatLng() : layer.getBounds().getCenter() }); }}
+        
         const body = document.body;
         ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(e => body.addEventListener(e, ev => {ev.preventDefault(); ev.stopPropagation();}, false));
         body.addEventListener('dragenter', () => body.classList.add('dragover'));
@@ -305,6 +237,17 @@
         }
         document.getElementById('search-input').addEventListener("keypress", function(event) { if (event.key === "Enter") performSearch(); });
 
+        // --- 5. 控制面板 (對應您的變數) ---
+        var layerConfig = [
+            { name: "✨ POKEMON STYLE", layer: layerPokemon, type: 'tile' },
+            { name: "🗺️ MODERN MAP (現今)", layer: layerModern, type: 'tile' },
+            { name: "📜 1953 交通圖", layer: layerHistory1953, type: 'tile' },
+            { name: "🚂 1939 RAILWAY", layer: layer1939, type: 'vector' },
+            { name: "🛤️ Sugar Railway", layer: layerSugarRail, type: 'vector' },
+            { name:"🍬 Sugar industry", layer: layerExtra, type: 'vector' }, 
+            { name: "🌿 TAIWAN REGION", layer: layerTaiwan, type: 'vector' }
+        ];
+
         var controlDiv = document.createElement('div');
         controlDiv.className = 'custom-layer-control leaflet-control';
         L.DomEvent.disableClickPropagation(controlDiv); L.DomEvent.disableScrollPropagation(controlDiv);
@@ -320,6 +263,7 @@
                 let header = document.createElement('div'); header.className = 'layer-header';
                 let label = document.createElement('label'); label.className = 'layer-label';
                 let checkbox = document.createElement('input'); checkbox.type = 'checkbox';
+                
                 checkbox.checked = map.hasLayer(item.layer);
                 
                 checkbox.onchange = function() {
@@ -327,12 +271,11 @@
                         item.layer.addTo(map); slider.disabled = false;
                         if (item.type === 'tile') item.layer.bringToBack();
                         if (item.name.includes("POKEMON") || item.name.includes("MODERN")) item.layer.bringToBack();
-                        if (item.type === 'vector') item.layer.eachLayer(l => l.bringToFront());
-                        
-                        // 寶可夢實體不再與此開關連動
+                        if (item.type === 'vector') item.layer.eachLayer(l => l.bringToFront()); 
+                        if (item.name.includes("POKEMON")) pokemonOnMapGroup.addTo(map);
                     } else {
                         map.removeLayer(item.layer); slider.disabled = true;
-                        // 寶可夢實體不再與此開關連動
+                        if (item.name.includes("POKEMON")) map.removeLayer(pokemonOnMapGroup);
                     }
                 };
                 
@@ -349,10 +292,6 @@
                 div.appendChild(slider); contentDiv.appendChild(div);
             });
         }
-        updateCustomControl();
-        
-        // ★ 確保寶可夢實體圖層一開始就存在 ★
-        pokemonOnMapGroup.addTo(map);
     </script>
 </body>
 </html>
