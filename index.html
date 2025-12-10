@@ -259,10 +259,11 @@
         }
 
         // 載入 GeoJSON (假設檔案存在同目錄)
-       loadGeoJSON('123/糖業.geojson', layerSugar, '#d32f2f', 'SUGAR FACTORY');
-loadGeoJSON('123/123456.geojson', layerExtra, '#1976d2', 'HIDDEN DATA');
-loadGeoJSON('123/台灣.geojson', layerTaiwan, '#2e7d32', 'TAIWAN REGION');
-loadGeoJSON('123/1939.geojson', layer1939, '#000000', '1939 RAILWAY');
+        loadGeoJSON('糖業.geojson', layerSugar, '#d32f2f', 'SUGAR FACTORY');
+        loadGeoJSON('123456.geojson', layerExtra, '#1976d2', 'HIDDEN DATA');
+        loadGeoJSON('台灣.geojson', layerTaiwan, '#2e7d32', 'TAIWAN REGION');
+               
+        
 
         var layerConfig = [
             { name: "✨ POKEMON STYLE", layer: layerPokemon, type: 'tile' },
@@ -354,6 +355,4 @@ loadGeoJSON('123/1939.geojson', layer1939, '#000000', '1939 RAILWAY');
         pokemonOnMapGroup.addTo(map);
     </script>
 </body>
-
 </html>
-
