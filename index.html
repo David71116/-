@@ -20,7 +20,7 @@
         .start-btn { background: #ffde00; border: 4px solid var(--poke-blue); padding: 15px 30px; font-family: 'Press Start 2P', cursive; font-size: 18px; cursor: pointer; box-shadow: 6px 6px 0 #000; animation: blink 1s infinite; margin-top: 100px; }
         @keyframes blink { 50% { opacity: 0; } }
 
-        /* 圖鑑主框架 */
+        /* 圖鑑介面 */
         #pokedex { position: relative; z-index: 10; width: 95vw; max-width: 1000px; height: 90vh; max-height: 750px; background-color: var(--dex-red); border-radius: 20px 20px 20px 60px; padding: 20px; display: flex; flex-direction: column; border: 6px solid #000; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
         .camera-lens { width: 45px; height: 45px; background: radial-gradient(circle at 30% 30%, #fff, var(--btn-blue)); border: 5px solid #fff; border-radius: 50%; position: absolute; top: 0; left: 0; box-shadow: 0 0 15px var(--btn-blue); animation: lightPulse 3s infinite; }
         @keyframes lightPulse { 0% { opacity: 0.6; } 50% { opacity: 1; box-shadow: 0 0 25px var(--btn-blue); } 100% { opacity: 0.6; } }
@@ -29,47 +29,41 @@
         #map-border { border: 4px solid #5a5a5a; border-radius: 5px; height: 100%; background: #000; overflow: hidden; position: relative; }
         #map { width: 100%; height: 100%; background: #a8dcb0; }
         
-        /* 年份顯示面板 */
         #year-display { position: absolute; top: 15px; left: 15px; z-index: 1001; background: rgba(0,0,0,0.85); color: #0f0; padding: 10px 20px; font-family: 'Press Start 2P', cursive; font-size: 20px; border: 3px solid #fff; display: none; text-shadow: 2px 2px #000; pointer-events: none; }
 
-        /* 控制面板 */
         #controls-area { height: 60px; margin-top: 15px; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 20px; background: #222; border-radius: 10px; border: 3px solid #000; }
         #search-input { width: 100%; background: #98cb98; border: none; padding: 12px; font-family: 'Press Start 2P', cursive; font-size: 10px; color: #000; }
         button { background: #ffde00; border: 3px solid #000; padding: 10px; cursor: pointer; font-family: 'Press Start 2P', cursive; font-size: 9px; box-shadow: 4px 4px 0 #000; }
 
-        /* 特效相關 */
         @keyframes evolutionFlashAnim { 0% { filter: brightness(100%); } 50% { filter: brightness(800%) contrast(0%); } 100% { filter: brightness(100%); } }
         .evolving-state .poke-sprite-img { animation: evolutionFlashAnim 0.3s infinite linear; }
         .mega-sprite-img { width: 100%; height: auto; image-rendering: pixelated; filter: drop-shadow(0 0 12px var(--btn-blue)) brightness(1.1); animation: megaPowerPulse 1.5s infinite ease-in-out alternate; }
-        @keyframes megaPowerPulse { from { transform: scale(1); } to { transform: scale(1.1); } }
+        @keyframes megaPowerPulse { from { transform: scale(1); filter: drop-shadow(0 0 10px var(--btn-blue)); } to { transform: scale(1.1); filter: drop-shadow(0 0 25px var(--btn-blue)); } }
 
         .poke-sprite-icon { background: transparent !important; border: none !important; overflow: visible !important; }
         .poke-sprite-img { width: 100%; height: auto; image-rendering: pixelated; filter: drop-shadow(4px 4px 0 rgba(0,0,0,0.4)); }
         
         .custom-layer-control { position: absolute; top: 15px; right: 10px; z-index: 1000; background: #fff; border: 4px solid var(--poke-blue); border-radius: 15px; font-size: 9px; width: 220px; box-shadow: 6px 6px 0 rgba(0,0,0,0.3); }
         .control-title-bar { background: var(--poke-yellow); border-bottom: 4px solid var(--poke-blue); padding: 8px; text-align: center; font-weight: bold; border-radius: 10px 10px 0 0; }
-        .control-content { padding: 10px; max-height: 250px; overflow-y: auto; }
+        .control-content { padding: 10px; max-height: 300px; overflow-y: auto; }
         .layer-item { margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px; }
         .opacity-slider { width: 100%; height: 6px; -webkit-appearance: none; background: #ddd; border-radius: 3px; }
         
         .pokemon-style-filter { filter: contrast(130%) saturate(160%) hue-rotate(-10deg) brightness(105%); }
         .history-sepia { filter: sepia(30%) contrast(110%); }
-
-        /* YouTube 隱藏容器 */
-        #yt-player { position: absolute; width: 1px; height: 1px; opacity: 0.01; pointer-events: none; }
     </style>
 </head>
 <body>
 
-    <div id="yt-player"></div>
-
     <div id="start-screen">
         <div class="poke-ball-btn"></div>
         <div class="title-box">
-            <div style="font-size:20px; color:var(--poke-blue); text-shadow: 2px 2px #ffde00;">SUGAR FACTORY<br>ULTIMATE DEX</div>
+            <div style="font-size:20px; color:var(--poke-blue); text-shadow: 2px 2px #ffde00;">SUGAR FACTORY<br>MOBILE READY DEX</div>
         </div>
         <button class="start-btn" onclick="startGame()">PRESS START</button>
     </div>
+
+    <div id="yt-bg-player" style="position: absolute; width: 0; height: 0; pointer-events: none;"></div>
 
     <div id="pokedex">
         <div class="header-deco"><div class="camera-lens"></div></div>
@@ -87,34 +81,47 @@
     </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
 
     <script>
-        // --- 1. 背景音樂系統 ---
+        // --- 1. 背景音樂與音效控制 (手機優化版) ---
         var player;
-        window.onYouTubeIframeAPIReady = function() {
-            player = new YT.Player('yt-player', {
-                height: '1', width: '1',
-                videoId: 'sdSwuDDMEzY',
-                playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': 'sdSwuDDMEzY', 'origin': window.location.origin },
-                events: { 'onReady': function() { console.log("Music Ready"); } }
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('yt-bg-player', {
+                height: '0', width: '0', videoId: 'sdSwuDDMEzY',
+                playerVars: { 'autoplay': 0, 'loop': 1, 'playlist': 'sdSwuDDMEzY' }
             });
-        };
-
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        function startGame() { 
-            document.getElementById('start-screen').classList.add('hidden'); 
-            if (player && player.playVideo) {
-                player.unMute();
-                player.setVolume(50);
-                player.playVideo();
-            }
         }
 
-        // --- 2. 地圖核心邏輯 ---
+        const sndClick = new Audio('https://www.soundjay.com/buttons/button-16.mp3'); 
+        const sndEvoProcess = new Audio('https://www.soundjay.com/clocks/sounds/beep-10.mp3'); 
+        const sndMegaBurst = new Audio('https://www.soundjay.com/explosion/sounds/explosion-02.mp3'); 
+
+        function playSnd(audio) { audio.currentTime = 0; audio.play().catch(e => console.log("Sound play blocked")); }
+
+        function startGame() { 
+            // 立即播放點擊聲
+            playSnd(sndClick);
+
+            // [核心] 手機音訊解鎖：預先播放並暫停所有音效檔
+            [sndEvoProcess, sndMegaBurst].forEach(snd => {
+                snd.play().then(() => {
+                    snd.pause();
+                    snd.currentTime = 0;
+                }).catch(e => console.log("Unlock blocked"));
+            });
+
+            // 啟動 YouTube 背景音樂並解除靜音
+            if (player && player.playVideo) { 
+                player.unMute();
+                player.setVolume(50);
+                player.playVideo(); 
+            }
+
+            document.getElementById('start-screen').classList.add('hidden'); 
+        }
+
+        // --- 2. 地圖初始化 ---
         var map = L.map('map', { preferCanvas: true, zoomControl: false }).setView([23.6, 121.0], 8);
         map.createPane('pokemonPane').style.zIndex = 650;
 
@@ -132,9 +139,8 @@
 
         let sugarFactories = []; 
         let timelineRunning = false;
-        let timelineInterval;
+        let timelineInterval; 
         let activeMarkers = {}; 
-        var searchIndex = [];
 
         function bindPopup(f, l) {
             let p = f.properties;
@@ -151,28 +157,29 @@
                     style: { color: color, weight: name.includes('1939') ? 5 : 3, opacity: 0.8 },
                     pointToLayer: (f, ll) => {
                         let isBlue = (f.properties && f.properties.經營訖 >= 2025);
-                        if (name.includes('industry')) { sugarFactories.push({ f, ll, isBlue }); }
+                        if (name.includes('Sugar Railway') || name.includes('Sugar industry')) { sugarFactories.push({ f, ll, isBlue }); }
                         let m = L.marker(ll, { icon: L.icon({ iconUrl: isBlue?iconPokeBlueUrl:iconPokeRedUrl, iconSize: [32, 32], iconAnchor: [16, 32] }) });
                         bindPopup(f, m);
                         return m;
                     }
                 }).addTo(group);
-                updateDex();
-            } catch (e) { console.warn("Missing: " + url); }
+                updateControl();
+            } catch (e) { console.warn("Load error: " + url); }
         }
 
         function restoreInitialState() {
             if (timelineInterval) clearInterval(timelineInterval);
             timelineRunning = false;
-            layerExtra.clearLayers();
+            layerSugarRail.clearLayers();
             sugarFactories.forEach(item => {
-                let m = L.marker(item.ll, { icon: L.icon({ iconUrl: item.isBlue?iconPokeBlueUrl:iconPokeRedUrl, iconSize: [32, 32], iconAnchor: [16, 32] }) }).addTo(layerExtra);
+                let m = L.marker(item.ll, { icon: L.icon({ iconUrl: item.isBlue?iconPokeBlueUrl:iconPokeRedUrl, iconSize: [32, 32], iconAnchor: [16, 32] }) }).addTo(layerSugarRail);
                 bindPopup(item.f, m);
             });
             document.getElementById('year-display').style.display = 'none';
         }
 
         function resetMap() {
+            playSnd(sndClick);
             map.setView([23.6, 121.0], 8);
             restoreInitialState();
             map.closePopup();
@@ -180,8 +187,9 @@
 
         function runTimeline() {
             if (timelineRunning) return;
+            playSnd(sndClick);
             timelineRunning = true;
-            layerExtra.clearLayers();
+            layerSugarRail.clearLayers();
             activeMarkers = {}; 
             const yearUI = document.getElementById('year-display');
             yearUI.style.display = 'block';
@@ -193,12 +201,12 @@
                     const startYear = parseInt(item.f.properties.經營起);
                     const endYear = parseInt(item.f.properties.經營訖);
                     if (startYear === year && !activeMarkers[index]) {
-                        let m = L.marker(item.ll, { icon: L.icon({ iconUrl: item.isBlue?iconPokeBlueUrl:iconPokeRedUrl, iconSize: [32, 32], iconAnchor: [16, 32] }) }).addTo(layerExtra);
+                        let m = L.marker(item.ll, { icon: L.icon({ iconUrl: item.isBlue?iconPokeBlueUrl:iconPokeRedUrl, iconSize: [32, 32], iconAnchor: [16, 32] }) }).addTo(layerSugarRail);
                         bindPopup(item.f, m);
                         activeMarkers[index] = m;
                     }
                     if (endYear < year && activeMarkers[index] && endYear < 2025) {
-                        layerExtra.removeLayer(activeMarkers[index]);
+                        layerSugarRail.removeLayer(activeMarkers[index]);
                         delete activeMarkers[index];
                     }
                 });
@@ -206,64 +214,48 @@
                 if (year > 2025) {
                     clearInterval(timelineInterval);
                     timelineRunning = false;
-                    alert("時光影集播放完畢！2025年僅剩善化與虎尾仍在運作。");
+                    alert("時光影集播放完畢！");
                     restoreInitialState(); 
                 }
             }, 60);
         }
 
-        // --- 3. NPC 夥伴系統 (含噴火龍進化優化) ---
+        // --- 3. 寶可夢角色 ---
         var charizardMarker;
         const pokes = [
             { id: 'charizard', lat: 23.5, lng: 119.5, img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/6.gif', size: 100 },
-            { id: 'pikachu', lat: 25.5, lng: 121.3, img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif', size: 65 },
+            { id: 'pikachu', lat: 25.5, lng: 121.3, img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/25.gif', size: 65 }, 
             { id: 'blastoise', lat: 24.2, lng: 122.5, img: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/versions/generation-v/black-white/animated/9.gif', size: 85 }
         ];
 
         pokes.forEach(p => {
-            // 優化彈窗偏移：根據精靈大小將彈窗往上推，絕對不擋住
-            let popOffset = (p.id === 'charizard') ? -60 : -p.size/2;
-            let icon = L.divIcon({ 
-                className: 'poke-sprite-icon', 
-                html: `<img src="${p.img}" class="poke-sprite-img" style="width:${p.size}px;">`, 
-                iconSize: [p.size, p.size], 
-                iconAnchor: [p.size/2, p.size/2], 
-                popupAnchor: [0, popOffset] 
-            });
+            let icon = L.divIcon({ className: 'poke-sprite-icon', html: `<img src="${p.img}" class="poke-sprite-img" style="width:${p.size}px;">`, iconSize: [p.size, p.size], iconAnchor: [p.size/2, p.size/2], popupAnchor: [0, -p.size/2] });
             let m = L.marker([p.lat, p.lng], { icon: icon, pane: 'pokemonPane' }).addTo(pokemonGroup);
-            
             if (p.id === 'charizard') {
                 charizardMarker = m;
                 m.bindPopup(`<b>噴火龍挑戰</b><br>哪座糖廠現在還有製糖？<br><div style="margin-top:8px;"><button onclick="checkEvo(true)" style="width:100%;">A. 善化糖廠</button><button onclick="checkEvo(false)" style="width:100%;margin-top:4px;">B. 台北糖廠</button></div>`);
             } else if (p.id === 'pikachu') {
                 m.bindPopup(`<b>皮卡丘影集</b><br><button onclick="runTimeline()" style="width:100%;margin-top:8px;">播放時光影集</button>`);
-            } else if (p.id === 'blastoise') {
-                m.bindPopup(`<b>水箭龜</b><br>守護著消失的鐵道記憶。`);
-            }
+            } else { m.bindPopup("<b>水箭龜</b><br>守護著消失的鐵道記憶。"); }
         });
 
         function checkEvo(correct) {
-            if (!correct) { alert("答錯了！再試一次？"); return; }
+            playSnd(sndClick);
+            if (!correct) { alert("答錯了！"); return; }
             charizardMarker.closePopup();
-            alert("太強了！噴火龍正在超進化...");
+            playSnd(sndEvoProcess); 
             let el = charizardMarker.getElement();
             if (el) el.classList.add('evolving-state');
-            
             setTimeout(() => {
-                // 更新為 MEGA CHARIZARD X 像素動圖，並大幅拉高彈窗位置
-                charizardMarker.setIcon(L.divIcon({ 
-                    className: 'poke-sprite-icon', 
-                    html: `<img src="https://play.pokemonshowdown.com/sprites/ani/charizard-megax.gif" class="mega-sprite-img" style="width:130px;">`, 
-                    iconSize: [130, 130], 
-                    iconAnchor: [65, 65],
-                    popupAnchor: [0, -90] // 大幅上移彈窗
-                }));
-                charizardMarker.setPopupContent("<b>MEGA CHARIZARD X</b><br>糖分力量 100%！<br>守護台灣糖業之火！");
+                playSnd(sndMegaBurst); 
+                charizardMarker.setIcon(L.divIcon({ className: 'poke-sprite-icon', html: `<img src="image_0.png" class="mega-sprite-img" style="width:130px;">`, iconSize: [130, 130], iconAnchor: [65, 65], popupAnchor: [0, -65] }));
+                if (el) el.classList.remove('evolving-state');
+                charizardMarker.setPopupContent("<b>MEGA CHARIZARD X</b><br>糖分力量 100%！");
                 charizardMarker.openPopup();
             }, 1500);
         }
 
-        // --- 4. 初始化 ---
+        // --- 4. 載入資料與面板 ---
         loadData('1939.geojson', layer1939, '#000', '🚂 1939 RAILWAY');
         loadData('糖業.geojson', layerSugarRail, '#d32f2f', '🛤️ Sugar Railway');
         loadData('123456.geojson', layerExtra, '#1976d2', '🍬 Sugar industry');
@@ -272,15 +264,14 @@
             { name: "✨ POKEMON STYLE", layer: layerPokemon, type: 'tile' },
             { name: "📜 1953 交通圖", layer: layerHistory1953, type: 'tile' },
             { name: "🚂 1939 RAILWAY", layer: layer1939, type: 'vector' },
-            { name: "🛤️ Sugar Railway", layer: layerSugarRail, type: 'vector' }, 
-            { name: "🍬 Sugar industry", layer: layerExtra, type: 'vector' } 
+            { name: "🛤️ Sugar Railway", layer: layerSugarRail, type: 'vector' },
+            { name: "🍬 Sugar industry", layer: layerExtra, type: 'vector' }
         ];
 
-        function updateDex() {
+        function updateControl() {
             let html = `<div class="control-title-bar">LAYER DEX</div><div class="control-content">`;
             layerConfig.forEach((item, idx) => {
-                let checked = map.hasLayer(item.layer) ? 'checked' : '';
-                html += `<div class="layer-item"><label><input type="checkbox" ${checked} onchange="toggleL(${idx}, this.checked)"> ${item.name}</label><br><input type="range" class="opacity-slider" min="0" max="1" step="0.1" value="1" oninput="changeO(${idx}, this.value)"></div>`;
+                html += `<div class="layer-item"><label><input type="checkbox" ${map.hasLayer(item.layer)?'checked':''} onchange="toggleL(${idx}, this.checked)"> ${item.name}</label><br><input type="range" class="opacity-slider" min="0" max="1" step="0.1" value="1" oninput="changeO(${idx}, this.value)"></div>`;
             });
             document.querySelector('.custom-layer-control').innerHTML = html + `</div>`;
         }
@@ -290,17 +281,20 @@
         document.getElementById('screen-container').appendChild(dexDiv);
 
         window.toggleL = (idx, c) => { 
+            playSnd(sndClick);
             const item = layerConfig[idx];
-            if (c) { item.layer.addTo(map); } else { map.removeLayer(item.layer); }
+            if (c) { item.layer.addTo(map); if (item.type==='tile') item.layer.bringToBack(); }
+            else { map.removeLayer(item.layer); }
         };
-
         window.changeO = (idx, v) => { 
             let item = layerConfig[idx];
-            if (item.type === 'tile') { item.layer.setOpacity(v); } 
-            else { item.layer.eachLayer(l => l.setStyle && l.setStyle({opacity: v, fillOpacity: v*0.5})); }
+            if (item.type==='tile') item.layer.setOpacity(v);
+            else item.layer.eachLayer(l => l.setStyle && l.setStyle({opacity: v, fillOpacity: v*0.5}));
         };
 
+        var searchIndex = [];
         function performSearch() {
+            playSnd(sndClick);
             let q = document.getElementById('search-input').value.toLowerCase();
             let res = searchIndex.find(i => i.text.includes(q));
             if (res) { map.flyTo(res.coords, 14); res.layer.openPopup(); }
